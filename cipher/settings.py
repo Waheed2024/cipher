@@ -145,7 +145,7 @@ CLOUDINARY_STORAGE = {
 STORAGES = {
     # This handles your CSS and Javascript for production
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
     # This forces all User Uploads & Media straight to Cloudinary
     "default": {
