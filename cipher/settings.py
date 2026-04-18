@@ -126,10 +126,6 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Where you put your local files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')   # Where Whitenoise gathers them for production
 
-# Tell Whitenoise to compress and cache your CSS/JS
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-
 # ==========================================
 # MEDIA FILES (User Uploads / Cloudinary)
 # ==========================================
