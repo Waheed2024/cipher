@@ -143,12 +143,6 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# Tell Django to use Cloudinary for all user uploads (Media)
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# Tell Django to use Cloudinary for CSS/JS (Static files) - Optional but recommended!
-STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
-
 # ==========================================
 # MODERN STORAGE ENGINE (Django 4.2+)
 # ==========================================
