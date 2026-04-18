@@ -10,6 +10,8 @@ from django.core.mail import send_mail
 from .models import Post, User, Comment, Tag, Subscriber
 from django.utils.text import slugify
 import uuid
+from django.http import JsonResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 
 
 # =========================================================
@@ -67,17 +69,21 @@ def library(request):
 
 @login_required
 def toggle_bookmark(request, slug):
-    """Adds or removes a document from the user's library."""
     post = get_object_or_404(Post, slug=slug)
     
     if request.user in post.bookmarks.all():
         post.bookmarks.remove(request.user)
-        messages.success(request, "DOCUMENT REMOVED FROM LIBRARY.")
+        is_bookmarked = False
     else:
         post.bookmarks.add(request.user)
-        messages.success(request, "DOCUMENT SECURED IN LIBRARY.")
+        is_bookmarked = True
+
+    # 1. NEW: Check if the request came from our background Javascript
+    if request.GET.get('ajax') == 'true':
+        return JsonResponse({'is_bookmarked': is_bookmarked})
         
-    return redirect(request.META.get('HTTP_REFERER', 'blog:home'))
+    # 2. FALLBACK: If Javascript fails, do the normal page reload
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
 # =========================================================
