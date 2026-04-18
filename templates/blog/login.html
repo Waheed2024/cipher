@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Override the default container to let the image go edge-to-edge */
+    .main-content {
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* The Full-Screen Background */
+    .auth-container {
+        /* Using a premium Unsplash image that matches your desk/coffee aesthetic */
+        background-image: url('https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-position: center;
+        min-height: calc(100vh - 80px); /* Fills screen minus navbar height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    /* The Glassmorphism Card */
+    .auth-card {
+        background: linear-gradient(135deg, rgba(252, 251, 249, 0.95), rgba(252, 251, 249, 0.75));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        padding: 3.5rem 3rem;
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+        
+        /* The Sweet Animation */
+        opacity: 0;
+        transform: translateY(30px);
+        animation: floatUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    @keyframes floatUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-card h1 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-card p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 2.5rem;
+    }
+
+    /* Form Inputs */
+    .form-group {
+        text-align: left;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.9rem;
+        border: 1px solid var(--accent-border);
+        background: rgba(255, 255, 255, 0.9);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+        border-color: var(--text-main);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background-color: var(--text-main);
+        color: white;
+        border: none;
+        font-family: var(--font-body);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+        background-color: #333;
+    }
+
+    /* Django Error Messages */
+    .alert {
+        padding: 0.8rem;
+        background-color: #ffebee;
+        color: #c62828;
+        font-size: 0.8rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #c62828;
+        text-align: left;
+    }
+
+    .auth-links {
+        margin-top: 2rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .auth-links a {
+        color: var(--text-main);
+        font-weight: 500;
+        text-decoration: none;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Welcome Back.</h1>
+        <p>Sign in to continue to CIPHER.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %} <div class="form-group">
+                <label>Username:</label>
+                <input type="text" name="username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn-submit">Sign In</button>
+        </form>
+
+        <div class="auth-links">
+            Need an account? <a href="{% url 'blog:register' %}">Subscribe here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

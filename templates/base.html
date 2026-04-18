@@ -1,0 +1,706 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CIPHER.{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* The Fade-In Engine */
+        body { animation: fadeIn 0.4s ease-in both; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        :root {
+            --bg-color: #fcfbf9; 
+            --text-main: #1a1a1a;
+            --text-muted: #888888;
+            --accent-border: #e5e5e5;
+            --accent-gold: #a89171;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --footer-bg: #0a0a0a;
+            --footer-text: #666666;
+            --footer-border: #1a1a1a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-main);
+            font-family: var(--font-body); -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column; min-height: 100vh; padding-top: 85px;
+        }
+        
+        /* Custom Text Selection */
+        ::selection { background-color: var(--text-main); color: var(--bg-color); }
+        ::-moz-selection { background-color: var(--text-main); color: var(--bg-color); }
+
+        /* Tactile Film Grain Overlay */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 99999; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Transition Curves & Hovers */
+        a, button, .profile-pill, .footer-btn, .prompt-signup, .auth-modal-card, input {
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important; 
+        }
+
+        .profile-pill:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.06); border-color: var(--accent-gold); }
+        .footer-btn:hover, .prompt-signup:hover, .auth-modal-card button[type="submit"]:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(26,26,26,0.15); }
+
+        img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        img:hover { transform: scale(1.02); }
+
+        /* Ruthless Spacing */
+        .main-content { padding-top: 4rem; padding-bottom: 6rem; }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; 
+            background: rgba(252, 251, 249, 0.80); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 5%; border-bottom: 1px solid rgba(229, 229, 229, 0.6);
+        }
+        .navbar-brand { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; letter-spacing: 2px; text-decoration: none; color: var(--text-main); z-index: 10001; }
+        
+        .desktop-nav { display: flex; align-items: center; gap: 2.2rem; }
+        .nav-item { text-decoration: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; }
+        .nav-item:hover { color: var(--text-main); }
+        
+        .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid var(--accent-border); padding: 0.4rem 1rem; margin: 0; position: relative; border-radius: 4px; }
+        .search-input { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 0.75rem; outline: none; width: 140px; text-transform: uppercase; letter-spacing: 1.5px; }
+        .search-input:focus { width: 180px; }
+        .search-input::placeholder { color: var(--text-muted); }
+        .icon { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+        .profile-pill { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 0.3rem 1rem 0.3rem 0.3rem; border: 1px solid var(--accent-border); border-radius: 50px; color: var(--text-main); background: var(--bg-color); }
+        .profile-pill:hover { border-color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+
+        /* MOBILE OVERLAY */
+        .mobile-toggle { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; z-index: 10001; }
+        .mobile-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: var(--bg-color); z-index: 9998;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2rem;
+            transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .mobile-overlay.active { transform: translateY(0); }
+        .mobile-nav-item { font-family: var(--font-heading); font-size: 2rem; color: var(--text-main); text-decoration: none; }
+
+        .main-content { padding: 0 5%; max-width: 1300px; margin: 0 auto; flex: 1; width: 100%; }
+
+        /* FOOTER */
+        .footer-container { background-color: var(--footer-bg); margin-top: 5rem; border-top: 2px solid var(--accent-gold); position: relative; z-index: 1; }
+        .footer-main { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 4rem; padding: 6rem 5%; max-width: 1300px; margin: 0 auto; align-items: start; }
+        .footer-col-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2.5px; color: #fff; font-weight: 700; margin-bottom: 2rem; }
+        .footer-nav { display: flex; flex-direction: column; gap: 1.2rem; }
+        .footer-nav a { color: var(--footer-text); text-decoration: none; font-size: 0.8rem; }
+        .footer-nav a:hover { color: var(--accent-gold); }
+        .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding: 2.5rem 5%; border-top: 1px solid var(--footer-border); font-size: 0.65rem; color: #444; text-transform: uppercase; letter-spacing: 2px; max-width: 1300px; margin: 0 auto; }
+        .footer-bottom a { color: inherit; text-decoration: none; }
+        .footer-bottom a:hover { color: var(--accent-gold); }
+        .footer-input { flex: 1; background: #111; border: 1px solid #222; padding: 0.8rem 1rem; color: #fff; font-family: inherit; font-size: 0.75rem; outline: none; letter-spacing: 1px; }
+        .footer-input:focus { border-color: var(--accent-gold); }
+        .footer-btn { background: var(--accent-gold); color: #fff; border: none; padding: 0.8rem 1.5rem; font-family: inherit; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; }
+        .footer-btn:hover { filter: brightness(1.2); }
+
+        /* PREMIUM FLOATING ESCAPE HATCH */
+        .floating-back-btn {
+            position: fixed; bottom: 30px; right: 30px; 
+            background-color: rgba(252, 251, 249, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(26, 26, 26, 0.15); color: var(--text-main);
+            padding: 0.8rem 1.5rem; border-radius: 50px; font-family: var(--font-body); font-size: 0.65rem;
+            text-transform: uppercase; letter-spacing: 2px; text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; font-weight: 600; 
+            cursor: grab; user-select: none; z-index: 9999 !important;
+        }
+        .floating-back-btn:hover { background-color: var(--bg-color); border-color: var(--accent-gold); color: var(--accent-gold); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .floating-back-btn:active { cursor: grabbing; }
+
+        /* THE PREMIUM MOBILE AUTH PROMPT */
+        .mobile-auth-prompt { display: none; }
+
+        @media (max-width: 768px) {
+            body { padding-top: 70px; }
+            .navbar { padding: 1rem 5%; }
+            .desktop-nav { display: none; }
+            .mobile-toggle { display: block; }
+            .footer-main { grid-template-columns: 1fr; gap: 4rem; text-align: center; padding: 5rem 5%; }
+            .footer-bottom { flex-direction: column; gap: 2rem; text-align: center; }
+            .footer-nav { align-items: center; }
+
+            .auth-modal-card { padding: 2rem 1.5rem !important; width: 95%; max-height: 90vh; overflow-y: auto; border-radius: 8px; }
+            .auth-modal-card h2 { font-size: 1.6rem !important; }
+            .close-modal-btn { top: 10px; right: 15px; }
+
+            .floating-back-btn { bottom: 20px; right: 20px; left: auto; transform: none; padding: 0.7rem 1.2rem; }
+
+            /* Mobile Pill & Z-Index Fixes */
+            body.has-auth-prompt { padding-bottom: 120px; }
+            .has-auth-prompt .floating-back-btn { bottom: 110px !important; }
+
+            .mobile-auth-prompt {
+                display: flex; justify-content: space-between; align-items: center;
+                position: fixed; bottom: 20px; left: 5%; width: 90%;
+                background: rgba(252, 251, 249, 0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 16px 20px;
+                z-index: 9995; box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(26,26,26,0.03);
+                opacity: 0; transform: translateY(100px); animation: slideUpPremium 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s forwards;
+            }
+            @keyframes slideUpPremium { to { opacity: 1; transform: translateY(0); } }
+
+            .prompt-text { display: flex; flex-direction: column; }
+            .prompt-text-main { font-family: var(--font-heading); font-size: 1.25rem; color: var(--text-main); font-weight: 700; line-height: 1.1; }
+            .prompt-text-sub { font-family: var(--font-body); font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
+            .prompt-actions { display: flex; gap: 15px; align-items: center; }
+            .prompt-login { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); text-decoration: none; font-weight: 600; }
+            .prompt-signup {
+                font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px;
+                background: var(--text-main); color: var(--bg-color); padding: 10px 18px; border-radius: 50px; text-decoration: none; font-weight: 600;
+                box-shadow: 0 4px 15px rgba(26,26,26,0.2); position: relative; overflow: hidden;
+            }
+            .prompt-signup::after {
+                content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+                background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+                animation: premiumShine 4s infinite cubic-bezier(0.64, 0.04, 0.35, 1);
+            }
+            @keyframes premiumShine { 0% { left: -100%; } 15% { left: 200%; } 100% { left: 200%; } }
+        }
+        
+        /* Custom Premium Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: rgba(26, 26, 26, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-black, #1a1a1a); }
+
+        /* THE AUTH MODAL ENGINE */
+        .auth-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0, 0, 0, 0.5); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 20000; 
+            display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .auth-modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .auth-modal-card {
+            background: linear-gradient(135deg, rgba(252, 251, 249, 0.95), rgba(252, 251, 249, 0.85)); border: 1px solid rgba(26, 26, 26, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2); padding: 3.5rem 3rem; width: 90%; max-width: 420px; text-align: center; position: relative;
+            transform: translateY(40px); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .auth-modal-overlay.active .auth-modal-card { transform: translateY(0); }
+
+        .close-modal-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; }
+        .close-modal-btn:hover { color: var(--text-main); }
+        .modal-input { width: 100%; padding: 0.9rem; border: 1px solid var(--accent-border); background: rgba(255, 255, 255, 0.9); font-family: var(--font-body); font-size: 0.9rem; outline: none; margin-bottom: 1.5rem; }
+        .modal-input:focus { border-color: var(--text-main); }
+        .modal-label { display: block; text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-main); margin-bottom: 0.5rem; font-weight: 500; }
+
+        /* Cinematic Reveal States */
+        .reveal-element { opacity: 0; transform: translateY(60px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: 0.15s; }
+        .reveal-element.is-visible { opacity: 1; transform: translateY(0); }
+        
+        /* The Premium Decryption Loader */
+        #decrypt-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: var(--bg-color); z-index: 999999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #decrypt-loader.active { opacity: 1; pointer-events: all; }
+        
+        .loader-content {
+            display: flex; flex-direction: column; align-items: center; gap: 12px; width: 280px;
+        }
+        #decrypt-text { 
+            font-family: monospace; font-size: 1.1rem; font-weight: 600; 
+            color: var(--text-main); letter-spacing: 6px; text-transform: uppercase; 
+        }
+        #decrypt-subtext {
+            font-family: monospace; font-size: 0.55rem; color: var(--text-muted);
+            letter-spacing: 2px; text-transform: uppercase; height: 10px;
+        }
+        .cyber-progress-bar {
+            width: 100%; height: 1px; background: rgba(26, 26, 26, 0.1); position: relative; overflow: hidden; margin-top: 10px;
+        }
+        .cyber-progress-fill {
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--accent-gold);
+        }
+        #decrypt-loader.active .cyber-progress-fill {
+            animation: cyberLoad 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+        }
+        @keyframes cyberLoad {
+            0% { left: -100%; }
+            40% { left: -40%; }
+            100% { left: 0%; }
+        }
+
+    </style>
+    <script type="module" src="https://cdn.skypack.dev/@hotwired/turbo"></script>
+</head>
+<body {% if not user.is_authenticated %}class="has-auth-prompt"{% endif %}>
+
+<div id="scroll-progress" style="position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--accent-gold, #d4af37); z-index: 10005; transition: width 0.1s ease-out;"></div>
+
+    <div id="decrypt-loader">
+        <div class="loader-content">
+            <div id="decrypt-text">AWAITING_PROTOCOL</div>
+            <div id="decrypt-subtext">INITIALIZING_HANDSHAKE...</div>
+            <div class="cyber-progress-bar"><div class="cyber-progress-fill"></div></div>
+        </div>
+    </div>
+    
+    <nav class="navbar">
+        <a href="{% url 'blog:home' %}" class="navbar-brand">CIPHER.</a>
+        <button class="mobile-toggle" id="mobileToggle" title="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <div class="desktop-nav">
+            <form action="{% url 'blog:search' %}" method="GET" class="search-box">
+                <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; color: var(--text-muted);">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+                <input type="text" name="q" class="search-input" id="desktop-search" placeholder="Search..." autocomplete="off">
+                <div id="search-dropdown" style="display: none; position: absolute; top: 130%; left: 0; background: var(--bg-color); border: 1px solid var(--accent-border); width: 250px; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden;"></div>
+            </form>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'blog:profile' %}" class="profile-pill">
+                    {% if user.avatar %}<img src="{{ user.avatar.url }}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover;">
+                    {% else %}<div style="width: 26px; height: 26px; border-radius: 50%; background-color: var(--text-main); color: var(--bg-color); display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">{{ user.username|make_list|first|upper }}</div>{% endif %}
+                    <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ user.username }}</span>
+                </a>
+                
+                <a href="{% url 'blog:about' %}" class="nav-item">About</a>
+                <a href="{% url 'blog:library' %}" class="nav-item">Library</a>
+                <a href="{% url 'blog:subscribe' %}" class="nav-item" title="Subscribe to Newsletter"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></a>
+                
+                {% if user.is_superuser %}
+                    <a href="{% url 'blog:admin_dashboard' %}" class="nav-item" style="color: var(--accent-gold); font-weight: 600;">Command HQ</a>
+                {% elif user.is_author %}
+                    <a href="{% url 'blog:write' %}" class="nav-item" style="color: var(--accent-gold);">Write</a>
+                {% endif %}
+
+                <form action="{% url 'blog:logout' %}" method="POST" style="display: inline; margin: 0;">{% csrf_token %}<button type="submit" class="nav-item" style="background:none; border:none; padding:0; font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; cursor:pointer;">Log Out</button></form>
+            {% else %}
+                <a href="{% url 'blog:about' %}" class="nav-item">About</a>
+                <a href="#loginModal" class="nav-item" onclick="switchModal('login'); return false;">Log In</a>
+                <a href="#signupModal" class="nav-item" style="color: var(--accent-gold);" onclick="switchModal('signup'); return false;">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="mobile-overlay" id="mobileMenu">
+        <form action="{% url 'blog:search' %}" method="GET" style="margin-bottom: 2rem; border-bottom: 1px solid var(--text-main); padding-bottom: 5px;">
+            <input type="text" name="q" placeholder="SEARCH..." style="background: transparent; border: none; font-family: var(--font-body); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; outline: none; color: var(--text-main);">
+        </form>
+        
+        <a href="{% url 'blog:home' %}" class="mobile-nav-item">Feed.</a>
+        <a href="{% url 'blog:about' %}" class="mobile-nav-item">About.</a> 
+        {% if user.is_authenticated %}
+            <a href="{% url 'blog:profile' %}" class="mobile-nav-item">Identity.</a>
+            <a href="{% url 'blog:library' %}" class="mobile-nav-item">Library.</a>
+            <a href="{% url 'blog:subscribe' %}" class="mobile-nav-item">Subscribe.</a>
+            
+            {% if user.is_superuser %}
+                <a href="{% url 'blog:admin_dashboard' %}" class="mobile-nav-item" style="color: var(--accent-gold);">Command HQ.</a>
+            {% elif user.is_author %}
+                <a href="{% url 'blog:write' %}" class="mobile-nav-item" style="color: var(--accent-gold);">Write.</a>
+            {% endif %}
+
+            <form action="{% url 'blog:logout' %}" method="POST" style="margin-top: 2rem;">{% csrf_token %}<button type="submit" style="background:none; border:none; font-family: var(--font-body); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); cursor: pointer;">Log Out</button></form>
+        {% else %}
+            <a href="#loginModal" class="mobile-nav-item" onclick="document.getElementById('mobileMenu').classList.remove('active'); switchModal('login'); return false;">Log In.</a>
+            <a href="#signupModal" class="mobile-nav-item" style="color: var(--accent-gold);" onclick="document.getElementById('mobileMenu').classList.remove('active'); switchModal('signup'); return false;">Sign Up.</a>
+        {% endif %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer-container">
+        <div class="footer-main">
+            <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 1rem; letter-spacing: 3px; line-height: 1;">CIPHER.</div>
+                <div style="font-size: 0.85rem; color: var(--footer-text); line-height: 1.8; max-width: 300px; margin: 0 auto; letter-spacing: 0.5px;">Securing the digital frontier. Curated intelligence and perspectives for the modern systems architect.</div>
+            </div>
+            <div>
+                <div class="footer-col-title">Index<span style="color: var(--accent-gold);">.protocol</span></div>
+                <div class="footer-nav">
+                    <a href="{% url 'blog:home' %}">The Live Feed</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'blog:library' %}">Personal Library</a>
+                        {% if user.is_author or user.is_superuser %}
+                            <a href="{% url 'blog:write' %}">Publish Perspective</a>
+                        {% endif %}
+                    {% endif %}
+                    <a href="{% url 'blog:about' %}">About the Platform</a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-col-title">Manifest<span style="color: var(--accent-gold);">.subscription</span></div>
+                <div style="font-size: 0.8rem; color: var(--footer-text); line-height: 1.8; margin-bottom: 2rem;">Join the manifest. Receive high-signal perspectives directly to your inbox the moment they are declassified.</div>
+                {% if user.is_authenticated %}
+                    <form action="{% url 'blog:subscribe' %}" method="POST" style="display: flex; gap: 0; width: 100%;">
+                        {% csrf_token %}
+                        <input type="email" name="email" class="footer-input" value="{{ user.email }}" required>
+                        <button type="submit" class="footer-btn">Subscribe</button>
+                    </form>
+                {% else %}
+                    <a href="#signupModal" class="footer-btn" style="text-decoration: none; display: block; text-align: center;" onclick="switchModal('signup'); return false;">Establish Connection &rarr;</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>© 2026 CIPHER. ALL SYSTEMS OPERATIONAL.</div>
+            <div style="display: flex; gap: 2.5rem;">
+                <a href="#">Twitter/X</a>
+                <a href="#">GitHub_Repo</a>
+                <a href="#">LinkedIn_Profile</a>
+            </div>
+        </div>
+    </footer>
+
+    {% if not user.is_authenticated %}
+    <div class="mobile-auth-prompt">
+        <div class="prompt-text">
+            <span class="prompt-text-main">Join CIPHER.</span>
+            <span class="prompt-text-sub">Unlock the manifest</span>
+        </div>
+        <div class="prompt-actions">
+            <a href="#loginModal" class="prompt-login" onclick="switchModal('login'); return false;">Log In</a>
+            <a href="#signupModal" class="prompt-signup" onclick="switchModal('signup'); return false;">Sign Up</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="auth-modal-overlay" id="loginModal">
+        <div class="auth-modal-card">
+            <button class="close-modal-btn" onclick="closeModals()">&times;</button>
+            <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 0.5rem; color: var(--text-main);">Welcome Back.</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">Sign in to continue to CIPHER.</p>
+            
+            <form action="{% url 'blog:login' %}" method="POST" data-turbo="false">
+                {% csrf_token %}
+                <label class="modal-label">Username:</label>
+                <input type="text" name="username" class="modal-input" required>
+                
+                <label class="modal-label">Password:</label>
+                <div style="position: relative;">
+                    <input type="password" name="password" class="modal-input" style="padding-right: 40px;" required>
+                    <button type="button" class="toggle-password" style="position: absolute; right: 12px; top: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 1rem; background: var(--text-main); color: white; border: none; font-weight: 600; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#333'" onmouseout="this.style.backgroundColor='var(--text-main)'">Sign In</button>
+            </form>
+            
+            <div style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                Need an account? <a href="#signupModal" onclick="switchModal('signup'); return false;" style="color: var(--text-main); font-weight: 600; text-decoration: none;">Subscribe here</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-modal-overlay" id="signupModal">
+        <div class="auth-modal-card" style="padding: 2.5rem 3rem;">
+            <button class="close-modal-btn" onclick="closeModals()">&times;</button>
+            <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 0.5rem; color: var(--text-main);">Join CIPHER.</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Become a part of the narrative.</p>
+            
+            <form action="{% url 'blog:register' %}" method="POST" data-turbo="false">
+                {% csrf_token %}
+                
+                <label class="modal-label">Username:</label>
+                <input type="text" name="username" class="modal-input" style="margin-bottom: 1rem;" required>
+                
+                <label class="modal-label">Email:</label>
+                <input type="email" name="email" class="modal-input" style="margin-bottom: 1rem;" required>
+                
+                <label class="modal-label">Password:</label>
+                <div style="position: relative;">
+                    <input type="password" name="password1" class="modal-input" style="margin-bottom: 0; padding-right: 40px;" required>
+                    <button type="button" class="toggle-password" style="position: absolute; right: 12px; top: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+                <ul style="font-size: 0.6rem; color: #888; margin-top: 5px; margin-bottom: 1rem; padding-left: 15px; text-align: left; line-height: 1.4;">
+                    <li>Must contain at least 8 characters.</li>
+                    <li>Can't be entirely numeric or commonly used.</li>
+                    <li>Can't be too similar to your personal info.</li>
+                </ul>
+                
+                <label class="modal-label">Password Confirmation:</label>
+                <div style="position: relative;">
+                    <input type="password" name="password2" class="modal-input" style="margin-bottom: 1rem; padding-right: 40px;" required>
+                    <button type="button" class="toggle-password" style="position: absolute; right: 12px; top: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 1rem; background: var(--text-main); color: white; border: none; font-weight: 600; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#333'" onmouseout="this.style.backgroundColor='var(--text-main)'">Create Account</button>
+            </form>
+            
+            <div style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                Already have an account? <a href="#loginModal" onclick="switchModal('login'); return false;" style="color: var(--text-main); font-weight: 600; text-decoration: none;">Sign In here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. MOBILE MENU TOGGLE
+        document.getElementById('mobileToggle').addEventListener('click', function() {
+            var menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('active');
+            if (menu.classList.contains('active')) {
+                this.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+            } else {
+                this.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+            }
+        });
+
+        // 2. SEARCH BOX
+        const searchInput = document.getElementById('desktop-search');
+        const dropdown = document.getElementById('search-dropdown');
+        if (searchInput && dropdown) {
+            searchInput.addEventListener('input', function() {
+                let query = this.value;
+                if (query.length > 1) { 
+                    fetch("{% url 'blog:search_suggestions' %}?q=" + query)
+                    .then(response => response.json())
+                    .then(data => {
+                        dropdown.innerHTML = ''; 
+                        if (data.results.length > 0) {
+                            dropdown.style.display = 'block';
+                            data.results.forEach(item => {
+                                let link = document.createElement('a');
+                                link.href = item.url;
+                                link.textContent = item.title;
+                                link.style.display = 'block'; link.style.padding = '12px 15px'; link.style.textDecoration = 'none'; link.style.color = 'var(--text-main)'; link.style.fontSize = '0.7rem'; link.style.textTransform = 'uppercase'; link.style.borderBottom = '1px solid var(--accent-border)';
+                                link.addEventListener('mouseover', () => link.style.backgroundColor = '#f0f0f0');
+                                link.addEventListener('mouseout', () => link.style.backgroundColor = 'transparent');
+                                dropdown.appendChild(link);
+                            });
+                        } else { dropdown.style.display = 'none'; }
+                    });
+                } else { dropdown.style.display = 'none'; }
+            });
+            document.addEventListener('click', e => { if (!e.target.closest('.search-box')) dropdown.style.display = 'none'; });
+        }
+
+        // 3. FAB DRAG PROTOCOL
+        document.addEventListener("DOMContentLoaded", function() {
+            const fab = document.querySelector('.floating-back-btn');
+            if (!fab) return;
+
+            let isDragging = false, hasJustDragged = false, startX, startY, initialMouseX, initialMouseY;
+            const savedPos = localStorage.getItem('cipher_fab_position');
+            if (savedPos) {
+                const { top, left } = JSON.parse(savedPos);
+                fab.style.transition = 'none'; fab.style.top = top; fab.style.left = left;
+                fab.style.bottom = 'auto'; fab.style.right = 'auto';  
+                setTimeout(() => fab.style.transition = '', 50); 
+            }
+
+            const dragStart = (e) => {
+                if (e.type === 'touchstart') e = e.touches[0];
+                initialMouseX = e.clientX; initialMouseY = e.clientY;
+                const rect = fab.getBoundingClientRect();
+                startX = initialMouseX - rect.left; startY = initialMouseY - rect.top;
+                isDragging = false; hasJustDragged = false; fab.style.transition = 'none';
+                document.addEventListener('mousemove', drag); document.addEventListener('touchmove', drag, { passive: false });
+                document.addEventListener('mouseup', dragEnd); document.addEventListener('touchend', dragEnd);
+            };
+
+            const drag = (e) => {
+                let clientX = e.clientX, clientY = e.clientY;
+                if (e.type === 'touchmove') { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                if (Math.abs(clientX - initialMouseX) > 5 || Math.abs(clientY - initialMouseY) > 5) {
+                    isDragging = true; hasJustDragged = true; 
+                    if (e.cancelable) e.preventDefault(); 
+                }
+                if (isDragging) {
+                    let newLeft = clientX - startX, newTop = clientY - startY;
+                    newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - fab.offsetWidth));
+                    newTop = Math.max(0, Math.min(newTop, window.innerHeight - fab.offsetHeight));
+                    fab.style.left = newLeft + 'px'; fab.style.top = newTop + 'px';
+                    fab.style.bottom = 'auto'; fab.style.right = 'auto';
+                }
+            };
+
+            const dragEnd = () => {
+                document.removeEventListener('mousemove', drag); document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', dragEnd); document.removeEventListener('touchend', dragEnd);
+                fab.style.transition = '';
+                if (isDragging) localStorage.setItem('cipher_fab_position', JSON.stringify({ top: fab.style.top, left: fab.style.left }));
+                setTimeout(() => { hasJustDragged = false; }, 50);
+                isDragging = false;
+            };
+
+            fab.addEventListener('click', (e) => { if (hasJustDragged) { e.preventDefault(); e.stopImmediatePropagation(); } });
+            fab.addEventListener('dragstart', (e) => e.preventDefault());
+            fab.addEventListener('mousedown', dragStart);
+            fab.addEventListener('touchstart', dragStart, { passive: false });
+        });
+
+        // 4. MODAL ENGINE HELPER FUNCTIONS
+        function closeModals() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('signupModal').classList.remove('active');
+        }
+        function switchModal(target) {
+            closeModals(); 
+            if (target === 'signup') document.getElementById('signupModal').classList.add('active');
+            else if (target === 'login') document.getElementById('loginModal').classList.add('active');
+        }
+
+        // 5. CORE DOM ENGINE
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // Close Modals via Background Click
+            document.querySelectorAll('.auth-modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModals(); });
+            });
+
+            // AJAX INTERCEPTOR FOR MODAL FORMS
+            async function handleAuthSubmit(e, formType) {
+                e.preventDefault();
+                const form = e.target;
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.textContent = 'AUTHENTICATING...'; btn.disabled = true;
+
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.url.includes('/login') && !response.url.includes('/register')) { window.location.reload(); return; }
+
+                    const html = await response.text();
+                    const doc = new DOMParser().parseFromString(html, 'text/html');
+                    const oldError = form.querySelector('.modal-error-box');
+                    if (oldError) oldError.remove();
+
+                    let errorHtml = '';
+                    if (formType === 'login') {
+                        const alertDiv = doc.querySelector('.alert');
+                        errorHtml = alertDiv ? alertDiv.innerHTML : "Authentication failed. Invalid credentials.";
+                    } else {
+                        const errorDiv = doc.querySelector('div[style*="#d93025"]');
+                        errorHtml = errorDiv ? errorDiv.innerHTML : "Registration failed. Please check the rules.";
+                    }
+
+                    const errorContainer = document.createElement('div');
+                    errorContainer.className = 'modal-error-box';
+                    errorContainer.style.cssText = 'background: rgba(255, 0, 0, 0.05); border-left: 3px solid #d93025; padding: 10px; margin-bottom: 15px; font-size: 0.75rem; color: #d93025; text-align: left; line-height: 1.4;';
+                    errorContainer.innerHTML = errorHtml;
+                    form.insertBefore(errorContainer, form.firstChild);
+
+                } catch (error) { console.error("Auth Error:", error); } 
+                finally { btn.textContent = originalText; btn.disabled = false; }
+            }
+
+            document.querySelector('#loginModal form').addEventListener('submit', (e) => handleAuthSubmit(e, 'login'));
+            document.querySelector('#signupModal form').addEventListener('submit', (e) => handleAuthSubmit(e, 'register'));
+
+            // Password Visibility Toggle
+            document.querySelectorAll('.toggle-password').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        this.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+                        this.style.color = 'var(--text-main)';
+                    } else {
+                        input.type = 'password';
+                        this.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                        this.style.color = 'var(--text-muted)';
+                    }
+                });
+            });
+
+            /* 6. CINEMATIC ENGINE: REVEAL ON SCROLL */
+            const contentElements = document.querySelectorAll('.main-content p, .main-content h1, .main-content h2, .main-content img:not(.no-reveal), .main-content .card');
+            contentElements.forEach(el => el.classList.add('reveal-element'));
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('is-visible');
+                    else entry.target.classList.remove('is-visible');
+                });
+            }, { threshold: 0.15, rootMargin: "0px 0px -20px 0px" });
+            contentElements.forEach(el => observer.observe(el));
+
+            /* 7. THE PREMIUM DECRYPTION LOADER */
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
+            const sysLogs = [
+                "LOCATING_NODE...",
+                "VERIFYING_HOST_IDENTITY...",
+                "BYPASSING_FIREWALL...",
+                "DECRYPTING_PAYLOAD...",
+                "ESTABLISHING_SECURE_TUNNEL...",
+                "ACCESS_GRANTED."
+            ];
+
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', e => {
+                    const href = link.getAttribute('href');
+                    
+                    // SAFEGUARD: If it's a modal link, starts with #, or has an onclick, IGNORE IT COMPLETELY.
+                    if (!href || href.startsWith('#') || link.hasAttribute('onclick') || link.target === "_blank") return;
+
+                    e.preventDefault(); 
+                    const loader = document.getElementById('decrypt-loader');
+                    const text = document.getElementById('decrypt-text');
+                    const subtext = document.getElementById('decrypt-subtext');
+                    
+                    loader.classList.add('active'); 
+
+                    let iterations = 0;
+                    let logIndex = 0;
+                    const targetText = "ESTABLISHING_LINK...";
+
+                    // Flash the sub-logs
+                    const logInterval = setInterval(() => {
+                        if (logIndex < sysLogs.length) {
+                            subtext.innerText = sysLogs[logIndex];
+                            logIndex++;
+                        }
+                    }, 120);
+
+                    // Scramble the main text
+                    const interval = setInterval(() => {
+                        text.innerText = targetText.split("").map((letter, index) => {
+                            if(index < iterations) return targetText[index];
+                            return letters[Math.floor(Math.random() * letters.length)];
+                        }).join("");
+
+                        if(iterations >= targetText.length) {
+                            clearInterval(interval);
+                            clearInterval(logInterval);
+                            subtext.innerText = "LINK_ESTABLISHED.";
+                            setTimeout(() => { window.location.href = href; }, 150); 
+                        }
+                        iterations += 1 / 2; 
+                    }, 30);
+                });
+            });
+        });
+
+        // 8. SCROLL PROGRESS BAR
+        window.addEventListener('scroll', () => {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("scroll-progress").style.width = scrolled + "%";
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Command HQ — CIPHER.{% endblock %}
+
+{% block content %}
+<style>
+    /* Dashboard Specific Styles */
+    body { background-color: #0a0a0a; color: #fff; } 
+    
+    .hq-header { text-align: center; margin-bottom: 4rem; padding-top: 2rem; border-bottom: 1px solid #222; padding-bottom: 3rem; }
+    .hq-title { font-family: var(--font-heading); font-size: 3rem; color: var(--accent-gold); margin-bottom: 1rem; letter-spacing: 2px; }
+    .hq-subtitle { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; color: #888; }
+
+    /* Action Grid */
+    .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-bottom: 5rem; }
+    .action-card { background: #111; border: 1px solid #222; padding: 2rem; text-align: center; text-decoration: none; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .action-card:hover { border-color: var(--accent-gold); transform: translateY(-5px); }
+    .action-title { font-family: var(--font-heading); font-size: 1.5rem; color: #fff; margin-bottom: 0.5rem; }
+    .action-desc { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Data Tables */
+    .data-section { margin-bottom: 5rem; background: #111; border: 1px solid #222; padding: 2rem; }
+    .section-header { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 3px; color: var(--accent-gold); margin-bottom: 2rem; border-bottom: 1px solid #222; padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;}
+    
+    .data-list { display: flex; flex-direction: column; }
+    .data-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #222; align-items: center; font-size: 0.8rem; }
+    .data-row:last-child { border-bottom: none; }
+    .data-title { font-weight: 600; color: #fff; text-decoration: none; }
+    .data-title:hover { color: var(--accent-gold); }
+    .data-meta { color: #666; text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; }
+    
+    .comment-row { grid-template-columns: 1fr 3fr 1fr auto; }
+    .comment-text { color: #ccc; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* Buttons */
+    .btn-expunge { background: transparent; border: 1px solid #ff3333; color: #ff3333; padding: 0.3rem 0.8rem; font-family: var(--font-body); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.3s ease; }
+    .btn-expunge:hover { background: #ff3333; color: #fff; }
+    .btn-edit { color: var(--accent-gold); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; padding: 0.4rem 0.8rem; border: 1px solid transparent; transition: border 0.3s ease; }
+    .btn-edit:hover { border: 1px solid var(--accent-gold); }
+
+    @media (max-width: 768px) {
+        .action-grid { grid-template-columns: 1fr; }
+        .data-row { grid-template-columns: 1fr; gap: 0.5rem; padding: 1.5rem 0; text-align: center; }
+        .comment-row { grid-template-columns: 1fr; }
+        .section-header { flex-direction: column; gap: 1rem; }
+    }
+</style>
+
+<div class="hq-header">
+    <h1 class="hq-title">COMMAND HQ</h1>
+    <div class="hq-subtitle">System Status: Operational &nbsp;|&nbsp; Clearance: Root</div>
+</div>
+
+<div style="max-width: 1000px; margin: 0 auto;">
+
+    <a href="{% url 'blog:home' %}" class="floating-back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Return to Feed
+    </a>
+    
+    <div class="action-grid">
+        <a href="{% url 'blog:write' %}" class="action-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="1.5" style="margin-bottom: 1rem;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <div class="action-title">Publish Document</div>
+            <div class="action-desc">Draft a new perspective</div>
+        </a>
+        <a href="/admin/" target="_blank" class="action-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5" style="margin-bottom: 1rem;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <div class="action-title">Raw Database</div>
+            <div class="action-desc">Open Django Admin Panel</div>
+        </a>
+    </div>
+
+    <div class="data-section">
+        <div class="section-header">
+            <span>Published Documents ({{ posts.count }})</span>
+        </div>
+        <div class="data-list">
+            {% for post in posts %}
+            <div class="data-row">
+                <a href="{% url 'blog:detail' post.slug %}" class="data-title" target="_blank">{{ post.title }}</a>
+                <span class="data-meta">{{ post.author.username }}</span>
+                <span class="data-meta">{{ post.published_date|date:"M d, Y" }}</span>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+                    <a href="{% url 'blog:edit_post' post.slug %}" class="btn-edit">Edit</a>
+                    <form action="{% url 'blog:delete_post' post.slug %}" method="POST" onsubmit="return confirm('PERMANENTLY EXPUNGE: {{ post.title }}?');" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-expunge">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div style="color: #666; font-size: 0.8rem; text-transform: uppercase; text-align: center; padding: 2rem 0;">No documents in database.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="data-section">
+        <div class="section-header">
+            <span>Global Communications ({{ comments.count }})</span>
+        </div>
+        <div class="data-list">
+            {% for comment in comments %}
+            <div class="data-row comment-row">
+                <span class="data-meta" style="color: var(--accent-gold);">{{ comment.author.username }}</span>
+                <span class="comment-text">"{{ comment.content }}"</span>
+                <span class="data-meta">{{ comment.created_at|date:"M d" }}</span>
+                
+                <div style="display: flex; justify-content: flex-end;">
+                    <form action="{% url 'blog:delete_comment' comment.id %}" method="POST" onsubmit="return confirm('EXPUNGE COMMENT BY {{ comment.author.username|upper }}?');" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-expunge">Expunge</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div style="color: #666; font-size: 0.8rem; text-transform: uppercase; text-align: center; padding: 2rem 0;">No communications intercepted.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

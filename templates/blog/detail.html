@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} — CIPHER.{% endblock %}
+
+{% block content %}
+<style>
+    .reading-container { max-width: 800px; margin: 2rem auto 8rem auto; }
+    
+    /* Document Header */
+    .article-header { text-align: center; margin-bottom: 3rem; }
+    .article-tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-gold); margin-bottom: 1.5rem; display: block; text-decoration: none; }
+    .article-title { font-family: var(--font-heading); font-size: 3.5rem; line-height: 1.15; margin-bottom: 1.5rem; color: var(--text-main); font-weight: 700;}
+    .article-meta { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+    
+    /* Document Body */
+    .article-cover { width: 100%; height: auto; max-height: 500px; object-fit: cover; margin-bottom: 4rem; background: #eee; border-radius: 4px; }
+    
+    /* The raw |safe filter allows HTML tags like <p> to render normally instead of showing up as text */
+    .article-content { font-family: var(--font-body); font-size: 1.15rem; line-height: 1.8; color: #222; margin-bottom: 4rem; }
+    .article-content p { margin-bottom: 1.5rem; }
+    
+    /* Interactive Elements */
+    .save-button-container { text-align: center; margin-bottom: 5rem; padding-bottom: 4rem; border-bottom: 1px solid var(--accent-border); }
+    .btn-save-doc { display: inline-flex; align-items: center; gap: 10px; background: transparent; border: 1px solid var(--text-main); color: var(--text-main); padding: 0.8rem 2rem; font-family: var(--font-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: all 0.3s ease; }
+    .btn-save-doc:hover { background: var(--text-main); color: var(--bg-color); }
+
+    /* Comment Section */
+    .comments-header { font-family: var(--font-heading); font-size: 2rem; margin-bottom: 2rem; }
+    .comment-card { background: #fff; border: 1px solid var(--accent-border); padding: 2rem; margin-bottom: 1.5rem; }
+    .comment-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1rem; }
+    .comment-text { font-size: 1rem; color: #444; line-height: 1.6; }
+    
+    .comment-form textarea { width: 100%; min-height: 120px; border: 1px solid var(--accent-border); padding: 1.5rem; font-family: var(--font-body); font-size: 0.95rem; margin-bottom: 1.5rem; outline: none; transition: border-color 0.3s ease; resize: vertical; }
+    .comment-form textarea:focus { border-color: var(--accent-gold); }
+    .btn-submit { background: var(--text-main); color: var(--bg-color); border: none; padding: 1rem 2.5rem; font-family: var(--font-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: background 0.3s ease;}
+    .btn-submit:hover { background: var(--accent-gold); }
+
+    @media (max-width: 768px) {
+        /* 1. Container & Breathing Room */
+        .reading-container { margin: 1.5rem auto 6rem auto; padding: 0 20px; }
+        
+        /* 2. Fluid Typography */
+        .article-header { margin-bottom: 2rem; }
+        .article-title { font-size: 2.2rem; line-height: 1.2; margin-bottom: 1rem; letter-spacing: -0.5px; }
+        .article-meta { gap: 10px; font-size: 0.65rem; flex-wrap: wrap; }
+        
+        /* 3. Edge-to-Edge Cinematic Cover */
+        .article-cover { 
+            width: calc(100% + 40px); /* Pulls it past the container padding */
+            margin-left: -20px; 
+            max-height: 35vh; 
+            border-radius: 0; /* Sharp edges for mobile */
+            margin-bottom: 2.5rem; 
+        }
+        
+        /* 4. Reading Optimization */
+        .article-content { font-size: 1.05rem; line-height: 1.7; margin-bottom: 3rem; }
+        
+        /* 5. Thumb-Friendly Action Zones */
+        .save-button-container { padding-bottom: 3rem; margin-bottom: 3rem; }
+        .btn-save-doc { width: 100%; justify-content: center; padding: 1rem; border-radius: 4px; }
+        
+        /* 6. Mobile Communications */
+        .comments-header { font-size: 1.6rem; text-align: center; margin-bottom: 1.5rem; }
+        .comment-card { padding: 1.2rem; }
+        .comment-meta { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .comment-meta span:nth-child(2) { display: none; } /* Hides the '|' divider on mobile */
+        .btn-submit { width: 100%; padding: 1rem; border-radius: 4px; }
+    }
+</style>
+
+<div class="reading-container">
+    
+    <a href="{% url 'blog:home' %}" class="floating-back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Return to Feed
+    </a>
+
+    <div class="article-header">
+        {% if post.tags.all %}
+            <a href="{% url 'blog:tag_filter' post.tags.first.slug %}" class="article-tag">{{ post.tags.first.name }}</a>
+        {% else %}
+            <span class="article-tag" style="color: var(--text-muted);">EDITORIAL</span>
+        {% endif %}
+        
+        <h1 class="article-title">{{ post.title }}</h1>
+        
+        <div class="article-meta">
+            <span style="font-weight: 600; color: var(--text-main);">{{ post.author.username }}</span>
+            <span>|</span>
+            <span>{{ post.published_date|date:"F d, Y" }}</span>
+            <span>|</span>
+            <span>{{ post.read_time }} MIN READ</span>
+        </div>
+    </div>
+
+    {% if post.cover_image %}
+        <img src="{{ post.cover_image.url }}" class="article-cover" alt="Cover Intelligence">
+    {% endif %}
+
+    <div class="article-content">
+        {{ post.content|safe }}
+    </div>
+
+    <div class="save-button-container">
+        {% if user.is_authenticated %}
+            <a href="{% url 'blog:toggle_bookmark' post.slug %}" class="btn-save-doc">
+                {% if user in post.bookmarks.all %}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    Remove from Library
+                {% else %}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    Save to Library
+                {% endif %}
+            </a>
+        {% else %}
+            <a href="{% url 'blog:login' %}" class="btn-save-doc">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                Log In to Save
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="comments-section">
+        <h3 class="comments-header">Global Communications ({{ post.comments.count }})</h3>
+        
+        {% if user.is_authenticated %}
+            <form method="POST" class="comment-form" style="margin-bottom: 4rem;">
+                {% csrf_token %}
+                <textarea name="content" placeholder="Add your perspective to the record..." required></textarea>
+                <button type="submit" class="btn-submit">Submit Communication</button>
+            </form>
+        {% else %}
+            <div style="background: #fff; border: 1px solid var(--accent-border); padding: 2rem; text-align: center; margin-bottom: 4rem;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1.5px;">Authorization Required</p>
+                <a href="{% url 'blog:login' %}" style="color: var(--accent-gold); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Log in to join the discussion &rarr;</a>
+            </div>
+        {% endif %}
+
+        <div class="comment-list">
+            {% for comment in post.comments.all|dictsortreversed:"created_at" %}
+            <div class="comment-card">
+                <div class="comment-meta">
+                    <span style="font-weight: 600; color: var(--text-main);">{{ comment.author.username }}</span>
+                    <span style="color: var(--accent-border);">|</span>
+                    <span style="color: var(--text-muted);">{{ comment.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="comment-text">{{ comment.content|linebreaksbr }}</div>
+            </div>
+            {% empty %}
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No communications have been recorded for this document.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

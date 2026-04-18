@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Write Perspective — CIPHER.{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'blog:admin_dashboard' %}" class="floating-back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Return to Command HQ
+    </a>
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<style>
+    .write-container {
+        max-width: 800px;
+        margin: 2rem auto 6rem auto;
+    }
+
+    .write-header {
+        margin-bottom: 3rem;
+        border-bottom: 1px solid var(--accent-border);
+        padding-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .write-title-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        font-family: var(--font-heading);
+        font-size: 3.5rem;
+        color: var(--text-main);
+        outline: none;
+        margin-bottom: 2rem;
+    }
+
+    .write-title-input::placeholder {
+        color: #d1d1d1;
+    }
+
+    /* Cover Image Upload Styling */
+    .cover-upload-wrapper {
+        margin-bottom: 1.5rem;
+    }
+    
+    .cover-upload-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        border: 1px dashed var(--accent-border);
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .cover-upload-label:hover {
+        border-color: var(--text-main);
+        color: var(--text-main);
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    /* THE NEW TAG INPUT STYLING */
+    .write-tag-input {
+        width: 100%;
+        border: none;
+        border-bottom: 1px dashed var(--accent-border);
+        background: transparent;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        color: var(--text-main);
+        outline: none;
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        transition: border-color 0.3s ease;
+    }
+
+    .write-tag-input:focus {
+        border-bottom-color: var(--text-main);
+    }
+
+    .write-tag-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    /* Override Quill's default styling to match CIPHER */
+    .ql-toolbar.ql-snow {
+        border: none;
+        border-top: 1px solid var(--accent-border);
+        border-bottom: 1px solid var(--accent-border);
+        padding: 15px 0;
+        font-family: var(--font-body);
+    }
+
+    .ql-container.ql-snow {
+        border: none;
+        font-family: var(--font-body);
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #333;
+        min-height: 400px;
+        padding-top: 1rem;
+    }
+
+    .ql-editor {
+        padding: 0;
+    }
+
+    .ql-editor.ql-blank::before {
+        color: #d1d1d1;
+        font-style: italic;
+        left: 0;
+    }
+
+    /* The Publish Button */
+    .btn-publish {
+        background-color: var(--text-main);
+        color: var(--bg-color);
+        border: none;
+        padding: 0.8rem 2.5rem;
+        font-family: var(--font-body);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-publish:hover {
+        background-color: #333;
+    }
+</style>
+
+<div class="write-container">
+    <form method="POST" enctype="multipart/form-data" id="publish-form">
+        {% csrf_token %}
+        
+        <div class="write-header">
+            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-gold);">Drafting Perspective</span>
+            <button type="submit" class="btn-publish">Publish</button>
+        </div>
+
+        <input type="text" name="title" class="write-title-input" placeholder="Give it a title..." required autocomplete="off">
+
+        <div class="cover-upload-wrapper">
+            <label for="cover-upload" class="cover-upload-label" id="file-name-display">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Attach Cinematic Cover
+            </label>
+            <input id="cover-upload" type="file" name="cover_image" accept="image/*"/>
+        </div>
+
+        <input type="text" name="tags" class="write-tag-input" placeholder="Tags (comma separated, e.g. Tech, Design, Architecture)" autocomplete="off">
+
+        <div id="editor"></div>
+        
+        <input type="hidden" name="content" id="hidden-content">
+    </form>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script>
+    // 1. Initialize the Rich Text Editor
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Write your perspective here...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'blockquote'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link'],
+                ['clean'] // removes formatting
+            ]
+        }
+    });
+
+    // 2. Before the form submits, grab the HTML inside the editor and put it in the hidden input!
+    var form = document.querySelector('#publish-form');
+    form.onsubmit = function() {
+        var contentInput = document.querySelector('#hidden-content');
+        contentInput.value = quill.root.innerHTML; 
+    };
+
+    // 3. UI touch: change the upload text when an image is selected
+    document.getElementById('cover-upload').addEventListener('change', function(e) {
+        var fileName = e.target.files[0].name;
+        var label = document.getElementById('file-name-display');
+        label.innerHTML = 'Attached: ' + fileName;
+        label.style.borderColor = 'var(--text-main)';
+        label.style.color = 'var(--text-main)';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Identity Settings — CIPHER.{% endblock %}
+
+{% block content %}
+<style>
+    /* Force Dark Theme for the Profile Interface */
+    body { background-color: #0a0a0a; color: #fff; }
+
+    .settings-container {
+        max-width: 600px;
+        margin: 0 auto 6rem auto;
+        background: #111;
+        border: 1px solid #222;
+        padding: 4rem 3rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .settings-header { text-align: center; margin-bottom: 3rem; }
+    .settings-title { font-family: var(--font-heading); font-size: 2.5rem; color: #fff; line-height: 1.1; margin-bottom: 0.5rem; }
+    .settings-subtitle { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 3px; color: var(--accent-gold); }
+
+    /* Avatar Upload Styling */
+    .avatar-section { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid #222; }
+    .current-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold); }
+    .avatar-fallback { width: 100px; height: 100px; border-radius: 50%; background: #222; color: var(--accent-gold); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 2.5rem; border: 1px solid #333; }
+    
+    .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; }
+    .btn-upload { border: 1px solid #444; color: #fff; background: transparent; padding: 0.6rem 1.5rem; font-family: var(--font-body); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.3s ease; }
+    .file-upload-wrapper:hover .btn-upload { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 2rem; }
+    .form-label { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 0.8rem; }
+    .form-control { width: 100%; background: #0a0a0a; border: 1px solid #222; padding: 1rem; color: #fff; font-family: var(--font-body); font-size: 0.85rem; outline: none; transition: border-color 0.3s ease; }
+    .form-control:focus { border-color: var(--accent-gold); }
+    textarea.form-control { resize: vertical; min-height: 120px; }
+
+    .btn-save { background: var(--accent-gold); color: #fff; border: none; padding: 1rem; width: 100%; font-family: var(--font-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: filter 0.3s ease; margin-top: 1rem; }
+    .btn-save:hover { filter: brightness(1.2); }
+
+    @media (max-width: 768px) {
+        .settings-container { padding: 3rem 1.5rem; border-left: none; border-right: none; }
+    }
+</style>
+
+<a href="{% url 'blog:home' %}" class="floating-back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Return to Feed
+    </a>
+
+<div class="settings-container">
+    <div class="settings-header">
+        <h1 class="settings-title">Identity.</h1>
+        <div class="settings-subtitle">Manage Your Protocol Clearance</div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="avatar-section">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" class="current-avatar" alt="Current Avatar">
+            {% else %}
+                <div class="avatar-fallback">{{ user.username|make_list|first|upper }}</div>
+            {% endif %}
+            
+            <div class="file-upload-wrapper">
+                <button type="button" class="btn-upload">Change Avatar</button>
+                <input type="file" name="avatar" accept="image/*">
+            </div>
+            <div style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Recommended: Square image (JPG, PNG)</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Biography / Status</label>
+            <textarea name="bio" class="form-control" placeholder="Update your system bio...">{{ user.bio|default_if_none:'' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-save">Update Credentials</button>
+    </form>
+</div>
+{% endblock %}
