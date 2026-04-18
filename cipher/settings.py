@@ -143,11 +143,9 @@ CLOUDINARY_STORAGE = {
 # MODERN STORAGE ENGINE (Django 4.2+)
 # ==========================================
 STORAGES = {
-    # This handles your CSS and Javascript for production
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
-    # This forces all User Uploads & Media straight to Cloudinary
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
