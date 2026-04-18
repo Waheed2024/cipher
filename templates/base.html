@@ -711,8 +711,9 @@
 
         bookmarkLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                e.preventDefault(); // This is the magic line that STOPS the page reload!
-                
+                e.preventDefault();  // STOPS the page reload
+                e.stopPropagation(); // <-- NEW: DESTROYS the click so it doesn't bubble up to the Library Card
+
                 // Add the ajax flag to tell the backend not to redirect
                 const url = this.getAttribute('href') + '?ajax=true';
                 const svg = this.querySelector('svg');
@@ -740,6 +741,15 @@
                         svg.setAttribute('fill', 'none');
                         svg.setAttribute('stroke', this.dataset.defaultStroke);
                         svg.setAttribute('stroke-width', '1.5');
+
+                        // NEW: If we are on the Library page, smoothly fade the card out and delete it
+                        const libCard = this.closest('.lib-card');
+                        if (libCard) {
+                            libCard.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                            libCard.style.opacity = '0';
+                            libCard.style.transform = 'scale(0.95)';
+                            setTimeout(() => libCard.remove(), 400); // Remove from HTML after fade finishes
+                        }
                     }
                 })
                 .catch(error => console.error('Error syncing library:', error));
