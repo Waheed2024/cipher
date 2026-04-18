@@ -152,3 +152,4 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
 }
+WHITENOISE_MANIFEST_STRICT = False
