@@ -152,10 +152,9 @@ CLOUDINARY_STORAGE = {
 # ==========================================
 # MODERN STORAGE ENGINE (Django 4.2+)
 # ==========================================
-STORAGES = {
+SSTORAGES = {
     "staticfiles": {
-        # CHANGE THIS LINE to use WhiteNoise's optimized storage
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
