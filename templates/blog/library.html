@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load cloudinary_tags %}
 
 {% block title %}Library — CIPHER.{% endblock %}
 
@@ -11,11 +12,16 @@
     /* The Desktop 3-Column Grid */
     .library-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-bottom: 6rem; }
 
-    .lib-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; transition: transform 0.3s ease; }
-    .lib-card:hover { transform: translateY(-5px); }
+    .lib-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
     .lib-image-wrapper { width: 100%; aspect-ratio: 4/3; overflow: hidden; margin-bottom: 1.5rem; background-color: #111; }
-    .lib-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; background-color: #111; }
-    .lib-card:hover .lib-image { transform: scale(1.05); }
+    .lib-image { width: 100%; height: 100%; object-fit: cover; background-color: #111; }
+    /* Only animate on devices that can hover — not touch screens */
+    @media (hover: hover) {
+        .lib-card { transition: transform 0.3s ease; }
+        .lib-card:hover { transform: translateY(-5px); }
+        .lib-image { transition: transform 0.8s ease; }
+        .lib-card:hover .lib-image { transform: scale(1.05); }
+    }
     
     .lib-meta { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-gold); margin-bottom: 0.8rem; }
     .lib-title { font-family: var(--font-heading); font-size: 1.5rem; line-height: 1.2; margin-bottom: 0.8rem; color: var(--text-main); }
@@ -55,7 +61,7 @@
             <a href="{% url 'blog:detail' post.slug %}" class="lib-card">
                 <div class="lib-image-wrapper">
                     {% if post.cover_image %}
-                        <img src="{{ post.cover_image.url }}" class="lib-image" loading="lazy" decoding="async">
+                        <img src="{{ post.cover_image.url|cloudinary_transform:'w_800,f_auto,q_auto' }}" class="lib-image" loading="lazy" decoding="async">
                     {% endif %}
                 </div>
                 <div class="lib-meta">

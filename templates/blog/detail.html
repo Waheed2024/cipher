@@ -114,7 +114,7 @@
                 {% endif %}
             </a>
         {% else %}
-            <a href="{% url 'blog:login' %}" class="btn-save-doc">
+            <a href="#loginModal" onclick="switchModal('login'); return false;" class="btn-save-doc">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                 Log In to Save
             </a>
@@ -133,7 +133,7 @@
         {% else %}
             <div style="background: #fff; border: 1px solid var(--accent-border); padding: 2rem; text-align: center; margin-bottom: 4rem;">
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1.5px;">Authorization Required</p>
-                <a href="{% url 'blog:login' %}" style="color: var(--accent-gold); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Log in to join the discussion &rarr;</a>
+                <a href="#loginModal" onclick="switchModal('login'); return false;" style="color: var(--accent-gold); text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Log in to join the discussion &rarr;</a>
             </div>
         {% endif %}
 

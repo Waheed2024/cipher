@@ -40,23 +40,31 @@
         ::selection { background-color: var(--text-main); color: var(--bg-color); }
         ::-moz-selection { background-color: var(--text-main); color: var(--bg-color); }
 
-        /* Tactile Film Grain Overlay */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none; z-index: 99999; opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        /* Tactile Film Grain Overlay — desktop only, feTurbulence kills mobile scroll */
+        @media (min-width: 769px) {
+            body::before {
+                content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                pointer-events: none; z-index: 99999; opacity: 0.03;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            }
         }
 
-        /* Transition Curves & Hovers */
+        /* Transition Curves — specific properties only, never 'all' */
         a, button, .profile-pill, .footer-btn, .prompt-signup, .auth-modal-card, input {
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important; 
+            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease,
+                        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease,
+                        box-shadow 0.3s ease !important;
         }
 
         .profile-pill:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.06); border-color: var(--accent-gold); }
         .footer-btn:hover, .prompt-signup:hover, .auth-modal-card button[type="submit"]:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(26,26,26,0.15); }
 
-        img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        img:hover { transform: scale(1.02); }
+        img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        /* Only apply hover scale on devices that actually support hover — not touch screens */
+        @media (hover: hover) {
+            img { transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+            img:hover { transform: scale(1.02); }
+        }
 
         /* Ruthless Spacing */
         .main-content { padding-top: 4rem; padding-bottom: 6rem; }
@@ -67,6 +75,10 @@
             background: rgba(252, 251, 249, 0.80); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex; justify-content: space-between; align-items: center;
             padding: 1.5rem 5%; border-bottom: 1px solid rgba(229, 229, 229, 0.6);
+        }
+        /* On mobile, solid bg is far cheaper than blur compositing */
+        @media (max-width: 768px) {
+            .navbar { background: var(--bg-color); backdrop-filter: none; -webkit-backdrop-filter: none; }
         }
         .navbar-brand { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; letter-spacing: 2px; text-decoration: none; color: var(--text-main); z-index: 10001; }
         
@@ -123,6 +135,9 @@
         }
         .floating-back-btn:hover { background-color: var(--bg-color); border-color: var(--accent-gold); color: var(--accent-gold); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .floating-back-btn:active { cursor: grabbing; }
+        @media (max-width: 768px) {
+            .floating-back-btn { background-color: var(--bg-color); backdrop-filter: none; -webkit-backdrop-filter: none; border-color: var(--accent-border); }
+        }
 
         /* THE PREMIUM MOBILE AUTH PROMPT */
         .mobile-auth-prompt { display: none; }
@@ -149,9 +164,8 @@
             .mobile-auth-prompt {
                 display: flex; justify-content: space-between; align-items: center;
                 position: fixed; bottom: 20px; left: 5%; width: 90%;
-                background: rgba(252, 251, 249, 0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-                border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 16px 20px;
-                z-index: 9995; box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(26,26,26,0.03);
+                background: var(--bg-color); border: 1px solid rgba(229, 229, 229, 0.8); border-radius: 16px; padding: 16px 20px;
+                z-index: 9995; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
                 opacity: 0; transform: translateY(100px); animation: slideUpPremium 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s forwards;
             }
             @keyframes slideUpPremium { to { opacity: 1; transform: translateY(0); } }
@@ -201,8 +215,12 @@
         .modal-input:focus { border-color: var(--text-main); }
         .modal-label { display: block; text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-main); margin-bottom: 0.5rem; font-weight: 500; }
 
-        /* Cinematic Reveal States */
-        .reveal-element { opacity: 0; transform: translateY(60px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: 0.15s; }
+        /* Cinematic Reveal States — specific props only, will-change primes the GPU layer */
+        .reveal-element {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, opacity;
+        }
         .reveal-element.is-visible { opacity: 1; transform: translateY(0); }
         
         /* The Premium Decryption Loader */
@@ -242,7 +260,6 @@
         }
 
     </style>
-    <script type="module" src="https://cdn.skypack.dev/@hotwired/turbo"></script>
 </head>
 <body {% if not user.is_authenticated %}class="has-auth-prompt"{% endif %}>
 
@@ -632,10 +649,13 @@
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) entry.target.classList.add('is-visible');
-                    else entry.target.classList.remove('is-visible');
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // fire once, then stop watching
+                    }
+                    // Removed: classList.remove('is-visible') — was re-animating on every upward scroll
                 });
-            }, { threshold: 0.15, rootMargin: "0px 0px -20px 0px" });
+            }, { threshold: 0.1, rootMargin: "0px 0px -20px 0px" });
             contentElements.forEach(el => observer.observe(el));
 
             /* 7. THE PREMIUM DECRYPTION LOADER */
@@ -648,17 +668,22 @@
                 "ESTABLISHING_SECURE_TUNNEL...",
                 "ACCESS_GRANTED."
             ];
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
             document.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', e => {
                     const href = link.getAttribute('href');
                     
-                    // SAFEGUARD: If it's a modal link, starts with #, or has an onclick, IGNORE IT COMPLETELY.
-                    // SAFEGUARD: If it's a modal link, starts with #, or has an onclick, IGNORE IT COMPLETELY.
-                    // SAFEGUARD: Ignore modals, external links, and our AJAX bookmark buttons
                     if (!href || href.startsWith('#') || link.hasAttribute('onclick') || link.target === "_blank" || href.includes('bookmark')) return;
 
                     e.preventDefault(); 
+
+                    // On mobile, skip the scramble animation — just navigate instantly
+                    if (isMobile) {
+                        window.location.href = href;
+                        return;
+                    }
+
                     const loader = document.getElementById('decrypt-loader');
                     const text = document.getElementById('decrypt-text');
                     const subtext = document.getElementById('decrypt-subtext');
@@ -669,7 +694,6 @@
                     let logIndex = 0;
                     const targetText = "ESTABLISHING_LINK...";
 
-                    // Flash the sub-logs
                     const logInterval = setInterval(() => {
                         if (logIndex < sysLogs.length) {
                             subtext.innerText = sysLogs[logIndex];
@@ -677,7 +701,6 @@
                         }
                     }, 120);
 
-                    // Scramble the main text
                     const interval = setInterval(() => {
                         text.innerText = targetText.split("").map((letter, index) => {
                             if(index < iterations) return targetText[index];
