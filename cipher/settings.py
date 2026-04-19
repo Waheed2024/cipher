@@ -122,9 +122,15 @@ USE_TZ = True
 # ==========================================
 # STATIC FILES (CSS, JavaScript, Local Images)
 # ==========================================
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Where you put your local files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')   # Where Whitenoise gathers them for production
+STATIC_URL = '/static/'
+
+# Tell Django where your newly created custom 'static' folder is located
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Tell Render where to collect all the files for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # ==========================================
 # MEDIA FILES (User Uploads / Cloudinary)
