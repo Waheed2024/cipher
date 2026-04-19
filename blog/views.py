@@ -20,13 +20,13 @@ from django.shortcuts import get_object_or_404
 
 def home(request):
     """Loads the main editorial feed."""
-    posts = Post.objects.all().order_by('-published_date')
+    posts = Post.objects.select_related('author').prefetch_related('tags').order_by('-published_date')
     return render(request, 'blog/home.html', {'posts': posts})
 
 def tag_filter(request, tag_slug):
     """Filters the feed by a specific clicked category/tag."""
     tag = get_object_or_404(Tag, slug=tag_slug)
-    posts = Post.objects.filter(tags=tag).order_by('-published_date')
+    posts = Post.objects.filter(tags=tag).select_related('author').prefetch_related('tags').order_by('-published_date')
     
     return render(request, 'blog/home.html', {
         'posts': posts,
@@ -60,7 +60,7 @@ def post_detail(request, slug):
 @login_required
 def library(request):
     """Loads the user's saved perspectives."""
-    posts = Post.objects.filter(bookmarks=request.user).order_by('-published_date')
+    posts = Post.objects.filter(bookmarks=request.user).select_related('author').prefetch_related('tags').order_by('-published_date')
     
     return render(request, 'blog/library.html', {
         'posts': posts,
