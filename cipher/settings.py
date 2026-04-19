@@ -161,3 +161,5 @@ SSTORAGES = {
     },
 }
 WHITENOISE_MANIFEST_STRICT = False
+# THE NUCLEAR OPTION: Force Django to use Cloudinary for all media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
