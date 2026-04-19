@@ -132,6 +132,10 @@ STATICFILES_DIRS = [
 # Tell Render where to collect all the files for production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# THE RENDER LIFESAVER: Tells WhiteNoise to search your source folders 
+# if the collected 'staticfiles' directory is being stubborn.
+WHITENOISE_USE_FINDERS = True
+
 # ==========================================
 # MEDIA FILES (User Uploads / Cloudinary)
 # ==========================================
@@ -150,7 +154,8 @@ CLOUDINARY_STORAGE = {
 # ==========================================
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        # CHANGE THIS LINE to use WhiteNoise's optimized storage
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
