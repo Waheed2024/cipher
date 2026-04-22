@@ -20,6 +20,25 @@
     .mission-text { font-family: var(--font-heading); font-size: 2.2rem; line-height: 1.3; color: var(--accent-gold); }
     .mission-author { display: block; margin-top: 1.5rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; color: #888; }
 
+    /* The Final CTA Button */
+    .enter-btn {
+        display: inline-block;
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        color: var(--bg-color);
+        background-color: var(--text-main);
+        padding: 1.2rem 3rem;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-top: 2rem;
+        transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    .enter-btn:hover {
+        background-color: var(--accent-gold);
+        transform: translateY(-3px);
+    }
+
     @media (max-width: 768px) {
         .about-title { font-size: 3rem; }
         .mission-text { font-size: 1.5rem; }
@@ -40,18 +59,22 @@
     </header>
 
     <article class="about-content">
-        <p>CIPHER was engineered with a singular objective: to cut through the noise of the modern web and deliver high-signal, zero-distraction intelligence. In an era of infinite scrolling and algorithmic manipulation, this platform stands as an independent sanctuary for deep technical thought and architectural exploration.</p>
+        <p>CIPHER was engineered with a singular objective: to cut through the noise of the modern web and deliver high-signal, zero-distraction intelligence. In an era of infinite scrolling and algorithmic manipulation, this platform stands as an independent sanctuary for deep technical thought where security, systems, and design converge.</p>
 
-        <p>Every line of code, from the cryptographic security protocols in the backend to the frosted-glass user interface you are looking at right now, was custom-built to prioritize reading velocity and cognitive focus. There are no tracking scripts, no intrusive advertisements, and no uninvited disruptions.</p>
+        <p>Every line of code, from the cryptographic protocols in the backend to the interface you are reading right now, was custom-built by Waheed Alayande a developer with a deliberate focus on the architecture of secure, well-designed systems. There are no tracking scripts, no intrusive advertisements, no uninvited disruptions.</p>
 
         <div class="mission-box">
             <div class="mission-text">"Privacy is not a feature. It is the foundational architecture of the future."</div>
             <span class="mission-author">— CIPHER Protocol</span>
         </div>
 
-        <p>Whether we are analyzing sequential circuits, building secure Django APIs, exploring Linux terminal commands, or testing the theoretical limits of digital logic, this archive serves as a permanent, immutable record of discovery. It is an environment built by developers, strictly for those who wish to master the machine.</p>
+        <p>This archive exists for those who want to understand how systems are built, broken, and secured. Access control, zero-trust architecture, the design of infrastructure documented with clarity, published without compromise.</p>
         
         <p>Welcome to the frontier. The connection is secure.</p>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{% url 'blog:home' %}" class="enter-btn">Enter the Feed &rarr;</a>
+        </div>
     </article>
 </div>
 {% endblock %}
